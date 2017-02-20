@@ -1,0 +1,10 @@
+server {
+    listen 80;
+    server_name <domain_name>;
+
+     location / { try_files $uri @app; }
+       location @app {
+          include uwsgi_params;
+          uwsgi_pass unix:/tmp/alexa.sock;
+     }
+}

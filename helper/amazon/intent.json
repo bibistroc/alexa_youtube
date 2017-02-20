@@ -1,0 +1,25 @@
+{
+    "intents": [
+        {
+            "intent": "AMAZON.PauseIntent"
+        },
+        {
+            "intent": "AMAZON.ResumeIntent"
+        },
+        {
+            "intent": "PersonalPiePlayYoutube",
+            "slots": [
+                {"name":"search_query", "type":"AMAZON.MusicRecording"}
+            ]
+        },
+        {
+            "intent": "AMAZON.ShuffleOnIntent"
+        },
+        {
+            "intent": "AMAZON.ShuffleOffIntent"
+        },
+        {
+            "intent": "AMAZON.HelpIntent"
+        }
+    ]
+}

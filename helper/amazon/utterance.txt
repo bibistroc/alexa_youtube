@@ -1,0 +1,5 @@
+PersonalPiePlayYoutube Play {search_query}
+PersonalPiePlayYoutube Search for {search_query}
+PersonalPiePlayYoutube Play me {search_query}
+PersonalPiePlayYoutube Listen to {search_query}
+PersonalPiePlayYoutube Listen {search_query}
