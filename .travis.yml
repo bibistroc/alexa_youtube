@@ -3,6 +3,7 @@ python:
   - "2.7"
 install: 
   - pip install -r requirements.txt
-  - pip install pytest-cov
+  - pip install pytest-cov codecov
 script: 
-  - py.test -v --cov
+  - py.test -v --cov=./
+  - codecov
