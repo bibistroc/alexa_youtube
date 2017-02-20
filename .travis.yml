@@ -5,4 +5,4 @@ install:
   - pip install -r requirements.txt
   - pip install pytest-cov
 script: 
-  - pytest -v --cov
+  - python -m pytest -v --cov
