@@ -15,6 +15,7 @@ def stream(video_id):
                              'Content-Disposition': 'inline', 'Content-Transfer-Encoding': 'binary',
                              'Content-Length': video.length})
 
+
 @app.route('/')
 def index():
     # only by sending this page first will the client be connected to the socketio instance
