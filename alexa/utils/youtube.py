@@ -6,12 +6,27 @@ config = LocalConfig()
 
 
 class YoutubeVideoInformation:
-    def __init__(self, video):
+    def __init__(self, video=None):
+        if video is not None:
+            self.__id = str(video['id']['videoId'])
+            self.__title = video['snippet']['title']
+
+    @property
+    def id(self):
+        return self.__id
+
+    @id.setter
+    def id(self, val):
+        self.__id = val
+
+    @property
+    def title(self):
+        return self.__title
+
+    @title.setter
+    def title(self, title):
         pattern = re.compile('[\W_]+')
-        self.id = str(video['id']['videoId'])
-        self.title = pattern.sub(' ', video['snippet']['title'])
-        self.thumb = video['snippet']['thumbnails']
-        self._current = 0
+        self.__title = pattern.sub(' ', title)
 
     @property
     def stream_url(self):
@@ -23,86 +38,123 @@ class YoutubeVideoInformation:
     def __repr__(self):
         return self.__str__()
 
+    def to_list(self):
+        return {
+            'id': self.id,
+            'title': self.__str__()
+        }
+
 
 class Youtube:
-    def __init__(self):
+    def __init__(self, items=None, session=None):
+        if items is None:
+            items = []
+        self.__items = items
+        self.__current = 0
+        self.__y = None
+        self.__session = session
+
+    def to_list(self):
+        item_list = []
+        for item in self.__items:
+            item_list.append(item.to_list())
+
+        return item_list
+
+    @property
+    def current_index(self):
+        return self.__current
+
+    @property
+    def __length(self):
+        # TODO: maybe cache this value?
+        return len(self.__items)
+
+    def __rebuild(self):
+        if self.__session is None or self.__length > 0:
+            return
+
+        for item in self.__session.attributes['playlist']:
+            video = YoutubeVideoInformation()
+            video.id = item.id
+            video.title = item.title
+            self.__items.append(video)
+
+    def current(self):
+        self.__rebuild()
+        if self.__length == 0:
+            return None
+
+        return self.__items[self.__current]
+
+    def next(self):
+        self.__rebuild()
+        self.__current += 1
+        if self.__current >= self.__length:
+            return None
+
+        return self.current()
+
+    def prev(self):
+        self.__rebuild()
+        self.__current -= 1
+        if self.__current <= 0:
+            return None
+
+        return self.current()
+
+    def clear(self):
+        self.__items = []
+        self.__current = 0
+        self.__session = None
+
+    @property
+    def y(self):
+        if self.__y is not None:
+            return self.__y
+
         api_key = config.youtube['api_key']
         api_service_name = config.youtube['api_service_name']
         api_version = config.youtube['api_version']
 
-        self._y = build(api_service_name, api_version,
-                        developerKey=api_key)
-        self._candidates = []
-        self.found = False
-        self.__current_index = 0
+        self.__y = build(api_service_name, api_version,
+                         developerKey=api_key)
 
-        self.__similar = []
-        self.__similar_index = 0
+        return self.__y
 
-    def clear(self):
-        self._candidates = []
-        self.found = False
-        self.__current_index = 0
-
-        self.__similar = []
-        self.__similar_index = 0
-
-    def current(self):
-        return self._candidates[self.__current_index]
-
-    def play_next(self):
-        self.__similar_index += 1
-
-        if len(self.__similar) == 0:
-            self.__get_similar()
-            self.__similar_index = 0
-
-        if len(self.__similar) == self.__similar_index:
-            last = self.__similar[self.__similar_index - 1]
-            self.__get_similar(last.id)
-            self.__similar_index = 0
-
-        return self.__similar[self.__similar_index]
-
-    def play_prev(self):
-        self.__similar_index -= 1
-
-        if self.__similar_index < 0 or len(self.__similar) == 0:
-            return False
-
-        return self.__similar[self.__similar_index]
-
-    def __get_similar(self, video_id=False):
-        limit = 10
-
-        search_response = self._y.search().list(
-            relatedToVideoId=video_id if video_id else self.current().id,
-            part="id,snippet",
-            maxResults=limit,
-            type="video",
-            fields="items(id(videoId),snippet(thumbnails,title))"
-        ).execute()
-
-        result_list = search_response.get("items", [])
-        self.__similar = []
-        for item in result_list:
-            self.__similar.append(YoutubeVideoInformation(item))
+    def save_session(self):
+        if self.__session is not None:
+            self.__session.attributes['playlist'] = self.to_list()
+            self.__session.attributes['current'] = self.current_index
 
     def search(self, query):
-        limit = 1
-
-        # https://developers.google.com/apis-explorer/?hl=en_US#p/youtube/v3/youtube.search.list
-        search_response = self._y.search().list(
+        search_response = self.y.search().list(
             q=query,
             part="id,snippet",
-            maxResults=limit,
+            maxResults=1,
             type="video",
-            fields="items(id(videoId),snippet(thumbnails,title))"
+            fields="items(id(videoId),snippet(title))"
         ).execute()
 
         result_list = search_response.get("items", [])
-        self._candidates = []
-        for item in result_list:
-            self._candidates.append(YoutubeVideoInformation(item))
+        self.__items.append(YoutubeVideoInformation(result_list[0]))
 
-        self.found = len(self._candidates) > 0
+        search_response = self.y.search().list(
+            relatedToVideoId=self.current().id,
+            part="id,snippet",
+            maxResults=9,
+            type="video",
+            fields="items(id(videoId),snippet(title))"
+        ).execute()
+
+        result_list = search_response.get("items", [])
+        for item in result_list:
+            self.__items.append(YoutubeVideoInformation(item))
+
+
+
+
+
+
+
+

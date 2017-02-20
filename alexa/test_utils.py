@@ -33,24 +33,14 @@ class UtilsYoutube(unittest.TestCase):
         self.assertNotEqual(repr(self.current).find('Du Hast'), -1)
 
     def test_play_next(self):
-        self.assertEqual(self.youtube.play_next(), self.youtube._Youtube__similar[0])
-
-    def test_play_next_queue(self):
-        self.youtube.play_next()
-        self.youtube._Youtube__similar_index = 9
-        self.youtube.play_next()
-        self.assertEqual(self.youtube._Youtube__similar_index, 0)
+        self.youtube.next()
+        self.assertEqual(self.youtube._Youtube__current, 1)
 
     def test_play_prev(self):
-        self.assertEqual(self.youtube.play_prev(), False)
-
-    def test_play_prev_works(self):
-        self.youtube.play_next()
-        self.youtube.play_next()
-        self.assertNotEqual(self.youtube.play_prev(), False)
+        self.assertEqual(self.youtube.prev(), None)
 
     def test_clear(self):
         self.youtube.clear()
-        self.assertEqual(len(self.youtube._candidates), 0)
+        self.assertEqual(len(self.youtube.to_list()), 0)
 
 
