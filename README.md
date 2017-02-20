@@ -1,4 +1,4 @@
--[![codecov](https://codecov.io/gh/bibistroc/alexa_youtube/branch/master/graph/badge.svg)](https://codecov.io/gh/bibistroc/alexa_youtube) [![Build Status](https://travis-ci.org/bibistroc/alexa_youtube.svg?branch=master)](https://travis-ci.org/bibistroc/alexa_youtube)
+[![codecov](https://codecov.io/gh/bibistroc/alexa_youtube/branch/master/graph/badge.svg)](https://codecov.io/gh/bibistroc/alexa_youtube) [![Build Status](https://travis-ci.org/bibistroc/alexa_youtube.svg?branch=master)](https://travis-ci.org/bibistroc/alexa_youtube)
 
 # Echo Dot Youtube Skill
 
