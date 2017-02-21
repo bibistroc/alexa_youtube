@@ -19,7 +19,7 @@ Note: In my setup, I used a domain name and CloudFlare free account because my h
 
 # Known Issues
 
-- [ ] Next and Previous are not fully functional
+- [x] Next and Previous are not fully functional
 - [ ] There are some issues with some videos that don't play and I don't know why, Yet
 - [ ] Only video can be played, this is indended and it will not be fixed (no playlist support)
 - [ ] Others?
@@ -44,3 +44,40 @@ This skill, search youtube for the `{search_query}` on youtube and plays the fir
 - [Flask](https://github.com/pallets/flask) - used to serve this application
 - [Flask-Ask](https://github.com/johnwheeler/flask-ask) - used for mapping alexa requests
 - [uWsgi](https://github.com/unbit/uwsgi) & [nginx](http://nginx.org/) - both used to host the flask application
+- [avconv](https://libav.org/avconv.html) - used to provide an audio stream that alexa can use
+
+# How it does the job
+
+When `Alexa` hears the `invocation name`, it will search for an api tied to that 'invocation' and will find the one defined by us in the developer accound. After that, it will call the api with the `{search_query}` as a parameter and the `Intent` as method.
+`Flask-Ask` handles that call and returns a response that `Alexa` can handle. This code is located in `alexa/intents/selection.py`:
+
+```
+@ask.intent("PersonalPiePlayYoutube")
+    def play_youtube(search_query):
+    [...]
+```
+
+Inside that method, an api to `youtube` is called and the first `video` (id and title) is returned along with 9 other 'related' videos. Then, `Alexa` start playing that stream. The stream itself is virtual and defined into `alexa/controller.py`:
+
+```
+@app.route("/stream/<video_id>.mp3")
+def stream(video_id):
+    video = Stream(video_id)
+    return Response(response=video.get(), status=200, mimetype='audio/mpeg',
+                    headers={'Access-Control-Allow-Origin': '*', 'Content-Type': 'audio/mpeg',
+                             'Content-Disposition': 'inline', 'Content-Transfer-Encoding': 'binary',
+                             'Content-Length': video.length})
+```
+
+When this url is accessed, the best audio stream from that `youtube` video is selected using `pafy` and passed to `avconv` to be streamed as a `.mp3` stream. `Avconv` takes the audio file stream and provide another stream, but this time, one that `Alexa` can 'play' (an mp3 one).
+ 
+# Local test
+
+You can run a local version with `Docker`. If you have `Docker` installed, just run `docker-compose up` in the root of this repo. In order to use this local endpoint with `Alexa` you will need the help of [ngrok](https://ngrok.com/).
+You must use `ngrok` to expose the local port `5000`:
+
+```sh
+ngrok http 5000
+```
+
+After the service starts, it will provide you with the external url that you can set on amazon developer site (Note: use the `https` one, alexa can only use https for requests).
