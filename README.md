@@ -6,7 +6,7 @@ This skill is intented for personal use only (in development mode), is highly re
 
 # Information
 
-I wrote and tested this code on a Raspberry Pi 2 b+ model. It should also work an Raspberry Pi 3 on any other vps online but is not tested. All the needed steps to make it work are described in [INSTALL.md](http://alexa_youtube.bibistroc.com/INSTALL) file at the root of this repository.
+I wrote and tested this code on a Raspberry Pi 2 b+ model. It should also work an Raspberry Pi 3 on any other vps online but is not tested. All the needed steps to make it work are described in [INSTALL.md](http://bibistroc.com/alexa_youtube/INSTALL) file at the root of this repository.
 
 Note: In my setup, I used a domain name and CloudFlare free account because my home IP address is dynamic. If you don't have a domain name, you can register a free .tk one. CloudFlare is used beause it offers an API to updated the online records and also provides free SSL certificates for domains (SSL is required for amazon integrations).
 
